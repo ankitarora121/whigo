@@ -1,33 +1,32 @@
-
-"""
-whigo deploy kibana-dashboard
-"""
-
-
-# from whigo import config, scope
-#
-# config.set(
-#     {
-#         'name': 'maitri-core',
-#         'environment': 'prod',
-#         'elasticsearch': {
-#             'host': 'localhost',
-#             'port': 8601
-#         }
-#     }
-# )
-#
-# @scope('whigo_fn_some_function')
-# def some_function():
-#     pass
-#
-#
-#
-# def some_other_function():
-#     with scope as
-#     pass
-#
+import whigo
 
 
 
+def test_foo():
+    @whigo.scope()
+    def foo():
+        print('ankit')
 
+    foo()
+
+
+
+def test_bar():
+    with whigo.scope('yolo') as ws:
+        print("yo")
+        ws.add_params(ankit='aorra')
+        raise Exception
+
+
+
+def test_yolo():
+    whigo.config.set({
+        'elasticsearch': {
+            'host': 'search-maitri-aws-es-bnwhwr7beazoh6dudncdymqanm.us-east-2.es.amazonaws.com',
+            'port': 443
+        }
+    })
+    for i in range(100):
+        with whigo.scope('swag') as ws:
+            print("yo")
+            ws.add_params(ankit='aorra')

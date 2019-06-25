@@ -13,20 +13,21 @@ config example:
 """
 
 import datetime
+import json
 import logging
 import uuid
 from contextlib import ContextDecorator
 from traceback import format_tb
 
+import sys
 from cmreslogging.handlers import CMRESHandler
-
 
 log = logging.getLogger(__name__)
 
 
 class WhigoScope:
-    def __init__(self, scopename):
-        self.scopename = scopename
+    def __init__(self, scopename=None):
+        self.scopename = scopename or WhigoScope.get_random_scopename()
         self.params = {}
         self.scoperun_id = str(uuid.uuid4())
         self.scope_start_time = datetime.datetime.now()
@@ -42,15 +43,21 @@ class WhigoScope:
         params = kwargs or {}
         duration = int(((scope_end_time - self.scope_start_time).total_seconds()) * 1000)
         end_params = {
-            'scope_run_id': self.scoperun_id,
-            'scope_name': self.scopename,
-            'scope_duration': duration,
-            'scope_start_time': self._format_date(self.scope_start_time),
-            'scope_end_time': self._format_date(scope_end_time),
-            **params
+            'whigo': {
+                'scope_run_id': self.scoperun_id,
+                'scope_name': self.scopename,
+                'scope_duration': duration,
+                'scope_start_time': self._format_date(self.scope_start_time),
+                'scope_end_time': self._format_date(scope_end_time),
+            },
+            'params': {**params}
         }
         self.params.update(end_params)
-        _emit(self.params)
+        whigo_log(self.params)
+
+    @staticmethod
+    def get_random_scopename():
+        return "unnamed-scope-{}".format(str(uuid.uuid4())[:8])
 
 
 class scope(ContextDecorator):
@@ -66,7 +73,7 @@ class scope(ContextDecorator):
     """
 
     def __init__(self, scopename=None):
-        self.scopename = scopename or scope.get_random_scopename()
+        self.scopename = scopename
         self.params = {}
 
     def __enter__(self):
@@ -81,45 +88,68 @@ class scope(ContextDecorator):
         self.scope.end(is_success=is_success)
         return False
 
-    @staticmethod
-    def get_random_scopename():
-        return "unnamed-scope-{}".format(str(uuid.uuid4())[:8])
-
     def add_params(self, **kwargs):
         self.scope.add_params(**kwargs)
 
 
-def setup_es_logger(namespace, application, environment, elasticsearch):
-    index_name = f"whigo_namespace_{namespace}"
-    handler = CMRESHandler(hosts=[{'host': elasticsearch['host'], 'port': elasticsearch['port']}],
-                           auth_type=CMRESHandler.AuthType.NO_AUTH,
-                           es_index_name=index_name,
-                           es_additional_fields={'app': application, 'environment': environment},
-                           buffer_size=1000, use_ssl=True)
-    log = logging.getLogger(index_name)
-    log.setLevel(logging.DEBUG)
-    log.addHandler(handler)
-    return log
+def get_es_handler(namespace, application, environment, elasticsearch):
+    index_name = f"whigo-{namespace}"
+    return CMRESHandler(hosts=[{'host': elasticsearch['host'], 'port': elasticsearch['port']}],
+                        auth_type=CMRESHandler.AuthType.NO_AUTH,
+                        es_index_name=index_name,
+                        es_additional_fields={'app': application, 'environment': environment},
+                        buffer_size=1000, use_ssl=True)
+
+
+class WhigoLogger:
+    __DEFAULT_WHIGO_LOGGER_NAME = 'whigo-logger'
+    __DEFAULT_WHIGO_NAMESPACE = 'default-whigo-namespace'
+    __DEFAULT_WHIGO_APPLICATION = 'default-whigo-application'
+    __DEFAULT_WHIGO_ENVIRONMENT = 'default-whigo-environment'
+
+    stdout_handler = logging.StreamHandler(sys.stdout)
+    stdout_handler.setLevel(logging.DEBUG)
+    logger = logging.getLogger(__DEFAULT_WHIGO_LOGGER_NAME)
+    logger.addHandler(stdout_handler)
+    logger.setLevel(logging.DEBUG)
+
+    @classmethod
+    def configure(cls, cfg):
+        namespace = cfg.get('namespace', cls.__DEFAULT_WHIGO_NAMESPACE)
+        application = cfg.get('application', cls.__DEFAULT_WHIGO_APPLICATION)
+        environment = cfg.get('environment', cls.__DEFAULT_WHIGO_ENVIRONMENT)
+        elasticsearch = cfg.get('elasticsearch', None)
+        cls.es_handler = get_es_handler(namespace, application, environment, elasticsearch)
+        cls.logger.setLevel(logging.DEBUG)
+        cls.logger.addHandler(cls.es_handler)
+
+    @classmethod
+    def get(cls):
+        return cls.logger
+
+    @classmethod
+    def clear(cls):
+        cls.es_handler = None
+        cls.logger.handlers = [cls.stdout_handler]
 
 
 class config(object):
 
     @classmethod
-    def set(cls, config):
-        cls.config = config
-        cls.logger = setup_es_logger(config['namespace'], config['application'], config['environment'], config['elasticsearch'])
+    def set(cls, cfg):
+        cls.cfg = cfg
+        WhigoLogger.configure(cfg)
 
     @classmethod
-    def get_logger(cls):
-        if not hasattr(cls, 'logger'):
-            cls.logger = None
-        return cls.logger
+    def get(cls):
+        return getattr(cls, 'cfg', None)
+
+    @classmethod
+    def clear(cls):
+        cls.cfg = None
+        WhigoLogger.clear()
 
 
-def _emit(data, msg=None):
-    whigologger = config.get_logger()
-    if not whigologger:
-        log.warning("No logger found")
-        raise Exception
-
-    whigologger.info(msg, extra=data)
+def whigo_log(data):
+    whigologger = WhigoLogger.get()
+    whigologger.info(json.dumps(data), extra=data)

@@ -1,6 +1,13 @@
 # whigo
-whigo - What the Hell Is Going On?!
-
-Free fast metrics for your code
 
 
+    \   \  /  \  /   / |  |  |  | |  |  /  _____| /  __  \
+     \   \/    \/   /  |  |__|  | |  | |  |  __  |  |  |  |
+      \            /   |   __   | |  | |  | |_ | |  |  |  |
+       \    /\    /    |  |  |  | |  | |  |__| | |  `--'  |
+        \__/  \__/     |__|  |__| |__|  \______|  \______/
+
+
+**W**hat the **H**ell **I**s **G**oing **O**n?!
+
+g
