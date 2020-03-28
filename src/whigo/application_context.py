@@ -12,17 +12,23 @@ def get_random_context_name():
     return f'app_context_{str(uuid.uuid4())}'
 
 
-def initialize_application_context(target=lambda x: stdout.write(json.dumps(x)), es_target_config=None, context_name=None, context_data=None):
+_stdout_target = lambda x: stdout.write(json.dumps(x))
+_default_targets = [_stdout_target]
+
+def initialize_application_context(targets=None, es_target_config=None, context_name=None, context_data=None):
     # initializes a default module level context
-    if es_target_config and target:
+    if es_target_config and targets:
         raise Exception("one of them can be passed")
 
-    target = target or ElasticSearchTarget(es_target_config)
+    if es_target_config:
+        context_targets = [ElasticSearchTarget(es_target_config)]
+    else:
+        context_targets = targets or _default_targets
 
     context_name = context_name or get_random_context_name()
     context_data = context_data or {}
     global whigo_application_context
-    whigo_application_context = WhigoContext(context_name, target, context_data)
+    whigo_application_context = WhigoContext(context_name, context_targets, context_data)
 
 def get_application_context():
     global whigo_application_context

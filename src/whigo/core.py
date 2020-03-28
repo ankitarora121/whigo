@@ -8,9 +8,9 @@ from whigo.old import whigo_log
 
 
 class WhigoContext:
-    def __init__(self, name, target, context_data=None):
+    def __init__(self, name, targets, context_data=None):
         self.name = name
-        self.target = target
+        self.targets = targets
         self.context_metadata = dict(  # should be immutable
             context_name=name,
             **context_data
@@ -19,7 +19,7 @@ class WhigoContext:
 
     def push(self, data):
         combined_data = {**data, 'context_metadata': self.context_metadata}
-        self.target(combined_data)
+        results = [t(combined_data) for t in self.targets]
 
 
 def get_random_scopename():

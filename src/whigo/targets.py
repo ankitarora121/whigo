@@ -17,7 +17,11 @@ def get_es_handler(cmres_config):
 class ElasticSearchTarget:
     def __init__(self, cmres_config):
         self.handler = get_es_handler(cmres_config)
-        logging.getLogger('asdasd')
+        self.target_logger = logging.getLogger('whigologger')
+        self.target_logger.setLevel(logging.DEBUG)
+        self.target_logger.propagate = False
+        self.target_logger.addHandler(self.handler)
+
 
     def __call__(self, data):
-        pass
+        self.target_logger.info('m', extra=data)
