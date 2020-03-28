@@ -29,7 +29,7 @@ def get_random_scopename():
 class WhigoScope:
     def __init__(self, context: WhigoContext, scope_name=None):
         self.context = context
-        self.scope_name = scope_name
+        self.scope_name = scope_name or get_random_scopename()
         self.scope_run_params = {}
         self._start()
 
@@ -37,7 +37,7 @@ class WhigoScope:
         self.scope_start_time = datetime.datetime.now()
         self.scope_metadata = {
             'scope_run_id': str(uuid.uuid4()),
-            'scope_name': self.scope_name or get_random_scopename(),
+            'scope_name': self.scope_name,
         }
 
     def _format_date(self, datetime_object):
