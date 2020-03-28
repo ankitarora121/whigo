@@ -34,10 +34,10 @@ class WhigoScope:
         self._start()
 
     def _start(self):
+        self.scope_start_time = datetime.datetime.now()
         self.scope_metadata = {
             'scope_run_id': str(uuid.uuid4()),
             'scope_name': self.scope_name or get_random_scopename(),
-            'scope_start_time': self._format_date(datetime.datetime.now()),
         }
 
     def _format_date(self, datetime_object):
@@ -49,11 +49,12 @@ class WhigoScope:
     def end(self, **kwargs):
         scope_end_time = datetime.datetime.now()
         params = kwargs or {}
-        duration = int(((scope_end_time - self.scope_metadata['scope_start_time']).total_seconds()) * 1000)
+        duration = int(((scope_end_time - self.scope_start_time).total_seconds()) * 1000)
 
         end_metadata = {
             'scope_duration': duration,
             'scope_end_time': self._format_date(scope_end_time),
+            'scope_start_time': self._format_date(self.scope_start_time),
         }
         self.scope_metadata.update(end_metadata)
         self.scope_run_params.update(params)

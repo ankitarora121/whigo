@@ -1,19 +1,23 @@
+import logging
+
 from cmreslogging.handlers import CMRESHandler
 
 
-def get_es_handler(namespace, application, environment, elasticsearch):
-    index_name = f"whigo-{namespace}"
-    return CMRESHandler(hosts=[{'host': elasticsearch['host'], 'port': elasticsearch['port']}],
-                        auth_type=CMRESHandler.AuthType.NO_AUTH,
-                        es_index_name=index_name,
-                        es_additional_fields={'app': application, 'environment': environment},
-                        buffer_size=1000, use_ssl=True)
+def get_es_handler(cmres_config):
+    default_kwargs = dict(
+        # hosts=[{'host': elasticsearch['host'], 'port': elasticsearch['port']}],
+        auth_type=CMRESHandler.AuthType.NO_AUTH,
+        es_index_name=f"whigo-es",
+        buffer_size=1000, use_ssl=True
+    )
+    combined_kwargs = {**default_kwargs, **cmres_config}
+    return CMRESHandler(**combined_kwargs)
 
 
 class ElasticSearchTarget:
-    def __init__(self, config):
-        # get_es_handler()
-        pass
+    def __init__(self, cmres_config):
+        self.handler = get_es_handler(cmres_config)
+        logging.getLogger('asdasd')
 
     def __call__(self, data):
         pass

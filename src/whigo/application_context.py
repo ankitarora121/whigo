@@ -1,3 +1,4 @@
+import json
 import uuid
 from sys import stdout
 
@@ -11,7 +12,7 @@ def get_random_context_name():
     return f'context_{str(uuid.uuid4())}'
 
 
-def initialize_application_context(target=stdout, es_target_config=None, context_name=None, context_data=None):
+def initialize_application_context(target=lambda x: stdout.write(json.dumps(x)), es_target_config=None, context_name=None, context_data=None):
     # initializes a default module level context
     if es_target_config and target:
         raise Exception("one of them can be passed")
@@ -23,3 +24,7 @@ def initialize_application_context(target=stdout, es_target_config=None, context
     context_name = f'app_context_{context_name}'
     global whigo_application_context
     whigo_application_context = WhigoContext(context_name, target, context_data)
+
+def get_application_context():
+    global whigo_application_context
+    return whigo_application_context
