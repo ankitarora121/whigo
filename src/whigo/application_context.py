@@ -1,4 +1,5 @@
 import json
+from pprint import pprint
 import uuid
 from sys import stdout
 
@@ -13,7 +14,7 @@ def get_random_context_name():
 
 
 _stdout_target = lambda x: stdout.write(json.dumps(x))
-_default_targets = [_stdout_target]
+_default_targets = [pprint]
 
 def initialize_application_context(targets=None, es_target_config=None, context_name=None, context_data=None):
     # initializes a default module level context
