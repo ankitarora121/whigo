@@ -1,6 +1,6 @@
 import whigo
 
-
+whigo.initialize()
 
 def test_foo():
     @whigo.scope()
