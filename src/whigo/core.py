@@ -1,10 +1,7 @@
-import copy
 import datetime
 import uuid
 from contextlib import ContextDecorator
 from traceback import format_tb
-
-from whigo.old import whigo_log
 
 
 class WhigoContext:
@@ -13,7 +10,7 @@ class WhigoContext:
         self.targets = targets
         self.context_metadata = dict(  # should be immutable
             context_name=name,
-            **context_data
+            **(context_data or {})
         )
         self.whigo_scope = None
 
