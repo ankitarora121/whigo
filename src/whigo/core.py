@@ -27,18 +27,22 @@ def get_random_scopename():
 
 
 class WhigoScope:
-    def __init__(self, context: WhigoContext, scope_name=None):
+    def __init__(self, context: WhigoContext, scope_name=None, auto_flask_scope_detection=True):
         self.context = context
         self.scope_name = scope_name or get_random_scopename()
         self.scope_run_params = {}
+        self.auto_flask_scope_detection = False
+        self.scope_run_id = f'sr-{str(uuid.uuid4())}'
         self._start()
 
     def _start(self):
+
         self.scope_start_time = datetime.datetime.now()
         self.scope_metadata = {
-            'scope_run_id': f'sr-{str(uuid.uuid4())}',
+            'scope_run_id': self.scope_run_id,
             'scope_name': self.scope_name,
         }
+
 
     def _format_date(self, datetime_object):
         return datetime_object.strftime('%Y/%m/%d %H:%M:%S Z')
@@ -47,6 +51,14 @@ class WhigoScope:
         self.scope_run_params.update(kwargs)
 
     def end(self, **kwargs):
+        # if self.auto_flask_scope_detection:
+        #     try:
+        #         from flask import g
+        #         detected_flask_whigo_scope = getattr(g, 'whigo_scope', None)
+        #         self.scope_metadata['detected_flask_whigo_scope'] = detected_flask_whigo_scope.scope_run_id
+        #     except Exception as e:
+        #         pass
+
         scope_end_time = datetime.datetime.now()
         params = kwargs or {}
         duration = int(((scope_end_time - self.scope_start_time).total_seconds()) * 1000)
