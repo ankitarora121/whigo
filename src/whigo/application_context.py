@@ -1,6 +1,6 @@
 import json
-from pprint import pprint
 import uuid
+from pprint import pprint
 from sys import stdout
 
 from whigo.core import WhigoContext
@@ -10,7 +10,7 @@ whigo_application_context = None
 
 
 def get_random_context_name():
-    return f'app_context_{str(uuid.uuid4())}'
+    return f'default_context'
 
 
 _stdout_target = lambda x: stdout.write(json.dumps(x))

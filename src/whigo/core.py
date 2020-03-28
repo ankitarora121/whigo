@@ -14,8 +14,8 @@ class WhigoContext:
         )
         self.whigo_scope = None
 
-    def push(self, data):
-        combined_data = {**data, 'context_metadata': self.context_metadata}
+    def push(self, scope_run_data):
+        combined_data = {'scope': scope_run_data, 'context': self.context_metadata}
         results = [t(combined_data) for t in self.targets]
 
 
@@ -36,8 +36,8 @@ class WhigoScope:
 
         self.scope_start_time = datetime.datetime.now()
         self.scope_metadata = {
-            'scope_run_id': self.scope_run_id,
-            'scope_name': self.scope_name,
+            'run_id': self.scope_run_id,
+            'name': self.scope_name,
         }
 
 
@@ -61,9 +61,9 @@ class WhigoScope:
         duration = int(((scope_end_time - self.scope_start_time).total_seconds()) * 1000)
 
         end_metadata = {
-            'scope_duration': duration,
-            'scope_end_time': self._format_date(scope_end_time),
-            'scope_start_time': self._format_date(self.scope_start_time),
+            'duration': duration,
+            'end_time': self._format_date(scope_end_time),
+            'start_time': self._format_date(self.scope_start_time),
         }
         self.scope_metadata.update(end_metadata)
         self.scope_run_params.update(params)

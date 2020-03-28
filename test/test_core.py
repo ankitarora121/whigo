@@ -7,7 +7,6 @@ def test_foo():
     def foo():
         print('ankit')
 
-    foo()
 
 
 
