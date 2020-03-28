@@ -23,7 +23,7 @@ class WhigoContext:
 
 
 def get_random_scopename():
-    return "unnamed-scope-{}".format(str(uuid.uuid4())[:8])
+    return "scope-{}".format(str(uuid.uuid4())[:8])
 
 
 class WhigoScope:
@@ -36,7 +36,7 @@ class WhigoScope:
     def _start(self):
         self.scope_start_time = datetime.datetime.now()
         self.scope_metadata = {
-            'scope_run_id': str(uuid.uuid4()),
+            'scope_run_id': f'sr-{str(uuid.uuid4())}',
             'scope_name': self.scope_name,
         }
 
