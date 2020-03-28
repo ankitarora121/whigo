@@ -9,7 +9,7 @@ whigo_application_context = None
 
 
 def get_random_context_name():
-    return f'context_{str(uuid.uuid4())}'
+    return f'app_context_{str(uuid.uuid4())}'
 
 
 def initialize_application_context(target=lambda x: stdout.write(json.dumps(x)), es_target_config=None, context_name=None, context_data=None):
@@ -21,10 +21,11 @@ def initialize_application_context(target=lambda x: stdout.write(json.dumps(x)),
 
     context_name = context_name or get_random_context_name()
     context_data = context_data or {}
-    context_name = f'app_context_{context_name}'
     global whigo_application_context
     whigo_application_context = WhigoContext(context_name, target, context_data)
 
 def get_application_context():
     global whigo_application_context
+    if not whigo_application_context:
+        raise Exception("Application context not initialized")
     return whigo_application_context
