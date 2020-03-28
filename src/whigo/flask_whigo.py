@@ -1,4 +1,3 @@
-import uuid
 from flask import g, request
 
 from whigo import get_application_context
