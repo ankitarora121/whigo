@@ -3,6 +3,8 @@ import uuid
 from contextlib import ContextDecorator
 from traceback import format_tb
 
+from whigo.util import AltContextDecorator
+
 
 class WhigoSession:
     def __init__(self, name, targets, session_data=None):
@@ -74,7 +76,7 @@ class WhigoScope:
         return dict(params=self.scope_run_params, metadata=self.scope_metadata)
 
 
-class WhigoScopeContextDecorator(ContextDecorator):
+class WhigoScopeContextDecorator(AltContextDecorator):
     """
     Basic Usage:
         with scope('some-scope-name'):
@@ -95,6 +97,14 @@ class WhigoScopeContextDecorator(ContextDecorator):
         return self
 
     def __exit__(self, exc_type, exc, exc_tb):
+        func = getattr(self, 'func', None)
+        if func:
+            func_details = {
+                'name': func.__name__,
+                'module': func.__module__
+            }
+            self.whigo_scope.add_params(**dict(function_details=func_details))
+
         is_success = not bool(exc)
         if not is_success:
             formatted_traceback = format_tb(exc_tb)
