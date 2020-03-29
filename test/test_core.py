@@ -6,14 +6,13 @@ def test_foo():
     @whigo.scope()
     def foo():
         print('ankit')
-
+    foo()
 
 
 
 def test_bar():
-    with whigo.scope('yolo') as ws:
+    with whigo.scope('asdasdasd') as ws:
         print("yo")
-        ws.add_params(ankit='aorra')
         raise Exception
 
 

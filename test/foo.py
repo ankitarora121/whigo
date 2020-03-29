@@ -1,10 +1,10 @@
 from flask import Flask
 
-from whigo import wrap_flask_app
+import whigo
 
 app = Flask(__name__)
 
-wrap_flask_app(app, 'test-flask-app')
+whigo.wrap_flask_app(app, 'test-flask-app')
 
 
 @app.route('/')

@@ -4,18 +4,18 @@ from contextlib import ContextDecorator
 from traceback import format_tb
 
 
-class WhigoContext:
-    def __init__(self, name, targets, context_data=None):
+class WhigoSession:
+    def __init__(self, name, targets, session_data=None):
         self.name = name
         self.targets = targets
-        self.context_metadata = dict(  # should be immutable
-            context_name=name,
-            **(context_data or {})
+        self.session_metadata = dict(  # should be immutable
+            session_name=name,
+            **(session_data or {})
         )
         self.whigo_scope = None
 
     def push(self, scope_run_data):
-        combined_data = {'scope': scope_run_data, 'context': self.context_metadata}
+        combined_data = {'scope': scope_run_data, 'session': self.session_metadata}
         results = [t(combined_data) for t in self.targets]
 
 
@@ -24,8 +24,8 @@ def get_random_scopename():
 
 
 class WhigoScope:
-    def __init__(self, context: WhigoContext, scope_name=None, auto_flask_scope_detection=True):
-        self.context = context
+    def __init__(self, session: WhigoSession, scope_name=None, auto_flask_scope_detection=True):
+        self.session = session
         self.scope_name = scope_name or get_random_scopename()
         self.scope_run_params = {}
         self.auto_flask_scope_detection = False
@@ -68,7 +68,7 @@ class WhigoScope:
         self.scope_metadata.update(end_metadata)
         self.scope_run_params.update(params)
         scope_run_data = self.get_scope_run_data()
-        self.context.push(scope_run_data)
+        self.session.push(scope_run_data)
 
     def get_scope_run_data(self):
         return dict(params=self.scope_run_params, metadata=self.scope_metadata)
@@ -86,12 +86,12 @@ class WhigoScopeContextDecorator(ContextDecorator):
             sc.add_params(num_media_processed=num_media_processed)
     """
 
-    def __init__(self, context, scope_name=None):
-        self.context = context
+    def __init__(self, session, scope_name=None):
+        self.session = session
         self.scope_name = scope_name
 
     def __enter__(self):
-        self.whigo_scope = WhigoScope(self.context, self.scope_name)
+        self.whigo_scope = WhigoScope(self.session, self.scope_name)
         return self
 
     def __exit__(self, exc_type, exc, exc_tb):

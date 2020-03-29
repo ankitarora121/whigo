@@ -1,12 +1,12 @@
 from flask import g, request
 
-from whigo import get_application_context
+from whigo import get_application_session
 from whigo.core import WhigoScope
 
 
 def wrap_flask_app(flask_app, app_name):
     def whigo_flask_before_request():
-        g.whigo_scope = WhigoScope(get_application_context(), f'flask-request-scope:{app_name}')
+        g.whigo_scope = WhigoScope(get_application_session(), f'flask-request-scope:{app_name}')
 
     def whigo_flask_after_request(response):
         end_params = {
