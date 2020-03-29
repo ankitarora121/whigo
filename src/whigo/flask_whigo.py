@@ -1,10 +1,9 @@
-from flask import g, request
-
 from whigo import get_application_session
 from whigo.core import WhigoScope
 
 
 def wrap_flask_app(flask_app, app_name):
+    from flask import g, request
     def whigo_flask_before_request():
         g.whigo_scope = WhigoScope(get_application_session(), f'flask-request-scope:{app_name}')
 
