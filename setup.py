@@ -7,8 +7,8 @@ with open('requirements.txt') as f:
 
 setup(
     name='whigo',  # How you named your package folder (MyLib)
-    packages=setuptools.find_packages(),  # Chose the same as "name"
-    version='0.1',  # Start with a small number and increase it with every change you make
+    packages=['src/whigo'],  # Chose the same as "name"
+    version='0.1.1',  # Start with a small number and increase it with every change you make
     license='MIT',  # Chose a license from here: https://help.github.com/articles/licensing-a-repository
     description='What the Hell Is Going On?',  # Give a short description about your library
     author='Ankit Arora',  # Type in your name

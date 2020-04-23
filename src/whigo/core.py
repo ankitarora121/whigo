@@ -26,7 +26,7 @@ def get_random_scopename():
 
 
 class WhigoScope:
-    def __init__(self, session: WhigoSession, scope_name=None, auto_flask_scope_detection=True):
+    def __init__(self, session: WhigoSession, scope_name=None):
         self.session = session
         self.scope_name = scope_name or get_random_scopename()
         self.scope_run_params = {}
